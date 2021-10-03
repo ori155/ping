@@ -60,6 +60,7 @@ impl<'a> EchoRequest<'a> {
     }
 }
 
+#[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub struct EchoReply {
     pub ident: u16,
     pub seq_cnt: u16,
