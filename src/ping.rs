@@ -11,7 +11,7 @@ const TOKEN_SIZE: usize = 24;
 const ECHO_REQUEST_BUFFER_SIZE: usize = ICMP_HEADER_SIZE + TOKEN_SIZE;
 type Token = [u8; TOKEN_SIZE];
 
-pub fn ping(addr: IpAddr, timeout: Option<Duration>, ttl: Option<u32>, ident: Option<u16>, seq_cnt: Option<u16>, payload: Option<&Token>) -> Result<(), Error> {
+pub fn ping(addr: IpAddr, timeout: Option<Duration>, ttl: Option<u32>, ident: Option<u16>, seq_cnt: Option<u16>, payload: Option<&Token>) -> Result<EchoReply, Error> {
     let timeout = match timeout {
         Some(timeout) => Some(timeout),
         None => Some(Duration::from_secs(4)),
@@ -23,7 +23,7 @@ pub fn ping(addr: IpAddr, timeout: Option<Duration>, ttl: Option<u32>, ident: Op
     let default_payload: &Token = &random();
 
     let request = EchoRequest {
-        ident: ident.unwrap_or(random()),
+        ident: ident.unwrap_or_else(random),
         seq_cnt: seq_cnt.unwrap_or(1),
         payload: payload.unwrap_or(default_payload),
     };
@@ -51,7 +51,7 @@ pub fn ping(addr: IpAddr, timeout: Option<Duration>, ttl: Option<u32>, ident: Op
     let mut buffer: [u8; 2048] = [0; 2048];
     socket.recv_from(&mut buffer)?;
 
-    let _reply = if dest.is_ipv4() {
+    let reply = if dest.is_ipv4() {
         let ipv4_packet = match IpV4Packet::decode(&buffer) {
             Ok(packet) => packet,
             Err(_) => return Err(Error::InternalError.into()),
@@ -67,5 +67,5 @@ pub fn ping(addr: IpAddr, timeout: Option<Duration>, ttl: Option<u32>, ident: Op
         }
     };
 
-    return Ok(());
+    Ok(reply)
 }

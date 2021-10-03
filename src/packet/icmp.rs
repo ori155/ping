@@ -60,14 +60,14 @@ impl<'a> EchoRequest<'a> {
     }
 }
 
-pub struct EchoReply<'a> {
+pub struct EchoReply {
     pub ident: u16,
     pub seq_cnt: u16,
-    pub payload: &'a [u8]
+    pub payload: Vec<u8>
 }
 
-impl<'a> EchoReply<'a> {
-    pub fn decode<P: Proto>(buffer: &'a [u8]) -> Result<Self, Error> {
+impl EchoReply{
+    pub fn decode<'a, P: Proto>(buffer: &'a [u8]) -> Result<Self, Error> {
         if buffer.as_ref().len() < HEADER_SIZE {
             return Err(Error::InvalidSize)
         }
@@ -81,7 +81,7 @@ impl<'a> EchoReply<'a> {
         let ident = (u16::from(buffer[4]) << 8) + u16::from(buffer[5]);
         let seq_cnt = (u16::from(buffer[6]) << 8) + u16::from(buffer[7]);
 
-        let payload = &buffer[HEADER_SIZE..];
+        let payload = buffer[HEADER_SIZE..].to_owned();
 
         Ok(EchoReply {
             ident, seq_cnt, payload
