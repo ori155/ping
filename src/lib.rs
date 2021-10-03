@@ -1,5 +1,5 @@
 mod errors;
-mod packet;
+pub mod packet;
 mod ping;
 
 pub use crate::ping::ping;

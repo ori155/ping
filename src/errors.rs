@@ -4,12 +4,19 @@ use thiserror::Error;
 pub enum Error {
     #[error("invalid procotol")]
     InvalidProtocol,
-    #[error("internal error")]
-    InternalError,
-    #[error("io error: {error}")]
-    IoError {
+    #[error("ICMP parsing error")]
+    ICMPParsing {
         #[from]
-        #[source]
-        error: ::std::io::Error
-    }
+        error: crate::packet::icmp::Error
+    },
+    #[error("IO error")]
+    IO {
+        #[from]
+        error: std::io::Error
+    },
+    #[error("IPv4 error")]
+    IPv4 {
+        #[from]
+        error: crate::packet::ipv4::Error
+    },
 }

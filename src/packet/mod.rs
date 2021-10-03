@@ -1,5 +1,5 @@
-mod icmp;
-mod ipv4;
+pub mod icmp;
+pub mod ipv4;
 
 pub use self::icmp::{HEADER_SIZE as ICMP_HEADER_SIZE, IcmpV4, IcmpV6, EchoRequest, EchoReply};
 

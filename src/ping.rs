@@ -29,14 +29,10 @@ pub fn ping(addr: IpAddr, timeout: Option<Duration>, ttl: Option<u32>, ident: Op
     };
 
     let socket = if dest.is_ipv4() {
-        if request.encode::<IcmpV4>(&mut buffer[..]).is_err() {
-            return Err(Error::InternalError.into());
-        }
+        request.encode::<IcmpV4>(&mut buffer[..])?;
         Socket::new(Domain::ipv4(), Type::raw(), Some(Protocol::icmpv4()))?
     } else {
-        if request.encode::<IcmpV6>(&mut buffer[..]).is_err() {
-            return Err(Error::InternalError.into());
-        }
+        request.encode::<IcmpV6>(&mut buffer[..])?;
         Socket::new(Domain::ipv6(), Type::raw(), Some(Protocol::icmpv6()))?
     };
 
@@ -52,19 +48,10 @@ pub fn ping(addr: IpAddr, timeout: Option<Duration>, ttl: Option<u32>, ident: Op
     socket.recv_from(&mut buffer)?;
 
     let reply = if dest.is_ipv4() {
-        let ipv4_packet = match IpV4Packet::decode(&buffer) {
-            Ok(packet) => packet,
-            Err(_) => return Err(Error::InternalError.into()),
-        };
-        match EchoReply::decode::<IcmpV4>(ipv4_packet.data) {
-            Ok(reply) => reply,
-            Err(_) => return Err(Error::InternalError.into()),
-        }
+        let ipv4_packet = IpV4Packet::decode(&buffer)?;
+        EchoReply::decode::<IcmpV4>(ipv4_packet.data)?
     } else {
-        match EchoReply::decode::<IcmpV6>(&buffer) {
-            Ok(reply) => reply,
-            Err(_) => return Err(Error::InternalError.into()),
-        }
+        EchoReply::decode::<IcmpV6>(&buffer)?
     };
 
     Ok(reply)
